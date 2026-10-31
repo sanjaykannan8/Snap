@@ -1,36 +1,212 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Snap
 
-## Getting Started
+One skill library for all your AI agents, with on-demand skill discovery.
 
-First, run the development server:
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+<!-- TODO: add 60-90s demo GIF -->
+
+## Why Snap
+
+- **Publish once, use in every agent.** Keep your skills in one library and connect MCP clients to it.
+- **Keep skill context focused.** Native skill metadata can grow with a library; Snap returns at most one matched skill per call. No general break-even point has been established.
+- **Self-host the service and storage.** Run the dashboard, MCP service, database, and object store yourself. The current router still sends each task and skill names and descriptions to Cloudflare Workers AI; it does not keep all data on your own servers.
+
+## How it works
+
+1. Publish a `SKILL.md` through the dashboard and create an API key for your agent.
+2. Connect an MCP client to the standalone service using the `X-Snap-API-Key` header.
+3. The agent calls `get_skill` with a short description of its task.
+4. Snap loads that user's skill metadata from DynamoDB and asks Workers AI to select a match.
+5. If the match meets the confidence threshold, Snap returns a five-minute signed URL to the skill file. Otherwise, the agent continues without one.
+
+Clef-flash is Cloudflare's 9B open-weight decision model: it returns probabilities for typed questions rather than generating text. Snap uses it by default; Clef is configurable. Older skills stored directly in DynamoDB are returned inline instead of by URL.
+
+```mermaid
+flowchart LR
+    U[User] --> W[Next.js dashboard]
+    W --> D[(DynamoDB)]
+    W --> S[(MinIO / S3-compatible storage)]
+    A[Agent / MCP client] -->|API key + get_skill| M[Standalone MCP service]
+    M --> D
+    M --> C[Cloudflare Workers AI]
+    M -->|Signed download URL| A
+    A -->|Download skill| S
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Quickstart
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Choose **one** of the following local workflows. Both expose the dashboard at [localhost:3000](http://localhost:3000) and the MCP endpoint at `http://127.0.0.1:3100/mcp`. Docker Desktop (or Docker Engine with Compose) must be running. Workers AI requires a Cloudflare account ID and API token.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Option 1: Run everything with Docker Compose
 
-## Learn More
+Copy `.env.example` to `.env`, then set `JWT_SECRET`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN` in `.env`. For example, in PowerShell:
 
-To learn more about Next.js, take a look at the following resources:
+```powershell
+Copy-Item .env.example .env
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start the full stack:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker compose up --build
+```
 
-## Deploy on Vercel
+Compose builds the Next.js frontend and standalone Python MCP images, starts DynamoDB Local and MinIO, and initializes the table and bucket. Leave it running, then open [localhost:3000](http://localhost:3000). The first build needs network access. Stop the stack with `docker compose down`; named volumes are retained.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Option 2: Run the frontend locally, then start the MCP stack with Docker
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is useful for frontend development. It requires Node.js 22+ and npm in addition to Docker; Python and uv are not required on the host. These commands use PowerShell.
+
+1. Copy the example configuration for Next.js and Compose:
+
+```powershell
+Copy-Item .env.example .env.local
+Copy-Item .env.example .env
+```
+
+2. Set a strong `JWT_SECRET` in `.env.local`. In `.env`, set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Leave the example local database, storage, and MCP URLs unchanged unless you have configured alternatives. Compose reads `.env`; Next.js reads `.env.local`.
+
+3. In the first terminal, install dependencies and start the frontend:
+
+```powershell
+npm ci
+npm run dev
+```
+
+4. In a second terminal at the repository root, start the MCP service and its dependencies:
+
+```powershell
+docker compose up -d --build mcp
+```
+
+Compose builds the Python MCP image and an initialization image, starts DynamoDB Local and MinIO, and creates the required table and bucket. It does not start the Dockerized web service, so the local frontend can use port 3000. The frontend may show connection errors until initialization completes. Check `docker compose ps` and `docker compose logs mcp` if needed; stop the containers with `docker compose down` when finished.
+
+For either option, open the dashboard, create an account, add a skill, and generate a connection key. In **Connections**, copy the setup for your agent; it uses `X-Snap-API-Key` for authentication. Localhost URLs work only from the same machine. For remote hosting, configure HTTPS and public MCP and storage URLs as described in [deployment notes](docs/backend.md).
+
+## Connect your agent
+
+The dashboard's connection panel produces these configurations with your endpoint and new key. A key is shown once; copy it before dismissing the panel. Keep populated configurations private and merge entries into existing settings instead of overwriting them.
+
+**Claude Code** — add to your project's `.mcp.json` (do not commit a file containing your key):
+
+```json
+{
+  "mcpServers": {
+    "snap": {
+      "type": "http",
+      "url": "http://127.0.0.1:3100/mcp",
+      "headers": { "X-Snap-API-Key": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+**Codex** — add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.snap]
+url = "http://127.0.0.1:3100/mcp"
+http_headers = { "X-Snap-API-Key" = "YOUR_API_KEY" }
+```
+
+**Cursor** — add to your personal `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "snap": {
+      "url": "http://127.0.0.1:3100/mcp",
+      "headers": { "X-Snap-API-Key": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+**VS Code** — use **MCP: Open User Configuration** and add:
+
+```json
+{
+  "servers": {
+    "snap": {
+      "type": "http",
+      "url": "http://127.0.0.1:3100/mcp",
+      "headers": { "X-Snap-API-Key": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+Restart the client or start a new session after saving. The agent decides when to call the tool; a useful instruction for its configuration is: “At the start of a substantive task, call `get_skill` with a short description of the task. Read the returned skill if there is a match.”
+
+## Skill format
+
+Snap currently accepts one `SKILL.md` file with `name` and `description` frontmatter:
+
+```markdown
+---
+name: api-review
+description: Review API endpoints for consistency and error handling.
+---
+
+# API review
+
+Check request validation, response shapes, and error handling.
+```
+
+## Configuration
+
+Use `.env.local` for the dashboard and `mcp-service/.env` for the Python service. See the example files for local defaults.
+
+| Variable | Purpose |
+| --- | --- |
+| `DYNAMODB_ENDPOINT` | Local DynamoDB endpoint; omit for AWS DynamoDB. |
+| `DYNAMODB_REGION`, `DYNAMODB_TABLE` | Shared DynamoDB region and table. |
+| `S3_ENDPOINT` | Object-storage endpoint used for uploads and reads. |
+| `S3_PUBLIC_ENDPOINT` | Endpoint used to sign URLs; it must be reachable by the agent. |
+| `S3_REGION`, `S3_BUCKET` | Object-storage region and shared bucket. |
+| `S3_ACCESS_KEY`, `S3_SECRET_KEY` | Server-side object-storage credentials. |
+| `JWT_SECRET` | Dashboard session signing secret. |
+| `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | Workers AI credentials for the MCP service; also needed by the web app's routing API if used. |
+| `CLOUDFLARE_CLEF_MODEL` | Clef model identifier; defaults to `@cf/cloudflare/clef-flash`. |
+| `SKILL_MATCH_THRESHOLD` | Minimum confidence for a match; defaults to `0.42`. |
+| `MCP_HOST`, `MCP_PORT` | Address and port for the MCP service. |
+| `MCP_ALLOWED_ORIGINS` | Comma-separated browser Origin allowlist; clients without an Origin header can omit it. |
+| `MCP_PUBLIC_URL` | Full MCP URL displayed by the dashboard. |
+
+## Security model
+
+The dashboard uses signed JWTs in `HttpOnly`, `SameSite=Lax` cookies, with `Secure` enabled in production. MCP keys are account-scoped; Snap stores their SHA-256 hashes and checks them on requests. Skill download URLs expire after five minutes. Revoking a key prevents later MCP calls, but does not invalidate URLs already issued.
+
+Skills contain instructions consumed by agents. Only publish and use skills you trust, and review them before applying their instructions.
+
+## Limitations and roadmap
+
+- Skills are single files; associated scripts and assets are not bundled.
+- New skills are delivered by signed URL; direct inline delivery for new files is a possible future improvement. Legacy DynamoDB-only skills are already returned inline.
+- The current choice compares skills without an explicit “no skill applies” option. A confidence threshold is a weak no-match signal; an explicit option is a possible improvement.
+- Automatic fallback to larger Clef and an R2 deployment are not implemented.
+- The dashboard uses a 64-skill capacity. Clef's limits on options within a single choice need verification before promising larger libraries.
+- Context savings depend on the client, skill library, and frequency of calls; they have not been established across real deployments.
+
+## When NOT to use Snap
+
+If you use one agent with a handful of skills and native skill loading already works for you, the extra service and storage may not be worthwhile.
+
+## Deployment
+
+Build `mcp-service/Dockerfile` from the `mcp-service` directory and run replicas behind HTTPS. Set `MCP_PUBLIC_URL` for the dashboard and make both the MCP endpoint and signed object-storage URL reachable by remote agents. Configure shared DynamoDB, storage, and secrets on each replica. See [docs/backend.md](docs/backend.md) for details.
+
+## Contributing
+
+Run the checks relevant to your change:
+
+```powershell
+npm run lint
+cd mcp-service
+uv run pytest
+```
+
+## License
+
+[MIT](LICENSE) © 2026 Kannan K

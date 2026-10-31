@@ -30,8 +30,30 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# Local credentials and environment files; keep documented templates.
 .env*
+!.env.example
+!mcp-service/.env.example
+*.key
+*.p12
+*.pfx
+.mcp.json
+.claude/
+
+# Internal evaluation scripts and results
+/mcp-service/benchmark_*.py
+/mcp-service/benchmark-*.json
+/docs/context-benchmark.md
+
+# Local and duplicate source artwork
+/snap-logo.png
+/snap-logo.svg
+/public/doodle-byte-logo.svg
+
+# Python caches and virtual environments
+.venv/
+__pycache__/
+.pytest_cache/
 
 # vercel
 .vercel

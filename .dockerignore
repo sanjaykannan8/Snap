@@ -1,0 +1,16 @@
+.git
+node_modules
+.venv
+__pycache__
+.pytest_cache
+.next
+.env*
+*.log
+.claude
+.mcp.json
+mcp-service/benchmark_*.py
+mcp-service/benchmark-*.json
+docs/context-benchmark.md
+snap-logo.png
+snap-logo.svg
+public/doodle-byte-logo.svg
