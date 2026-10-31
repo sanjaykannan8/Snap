@@ -1,6 +1,7 @@
 import json
 
 import pytest
+import httpx
 from starlette.testclient import TestClient
 
 import server
@@ -36,6 +37,33 @@ def test_mcp_authentication_tool_and_revocation(monkeypatch):
 @pytest.mark.asyncio
 async def test_empty_library_needs_no_cloudflare():
     assert await server.select_skill("anything", []) is None
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("provider", ["local", "cloudflare"])
+async def test_select_skill_uses_configured_provider(monkeypatch, provider):
+    monkeypatch.setenv("ROUTING_PROVIDER", provider)
+    monkeypatch.setenv("LOCAL_SYSTEMONE_URL", "http://model.test/v1/systemone")
+    monkeypatch.setenv("LOCAL_SYSTEMONE_MODEL", "local-model")
+    monkeypatch.setenv("LOCAL_SYSTEMONE_API_KEY", "local-key")
+    monkeypatch.setenv("CLOUDFLARE_ACCOUNT_ID", "test-account")
+    monkeypatch.setenv("CLOUDFLARE_API_TOKEN", "cloud-key")
+    monkeypatch.setenv("CLOUDFLARE_CLEF_MODEL", "@cf/cloudflare/clef-flash")
+
+    class Client:
+        def __init__(self, **kwargs): pass
+        async def __aenter__(self): return self
+        async def __aexit__(self, *args): pass
+        async def post(self, url, headers, json):
+            assert url == ("http://model.test/v1/systemone" if provider == "local" else "https://api.cloudflare.com/client/v4/accounts/test-account/ai/run/@cf/cloudflare/clef-flash")
+            assert headers["Authorization"] == ("Bearer local-key" if provider == "local" else "Bearer cloud-key")
+            assert json["model"] == ("local-model" if provider == "local" else "clef-flash")
+            assert json["questions"]["skill"]["criteria"] == {"one": "Design: Design help"}
+            return httpx.Response(200, request=httpx.Request("POST", url), json={"answers": {"skill": {"choice": "one", "confidence": 0.9}}})
+
+    monkeypatch.setattr(server.httpx, "AsyncClient", Client)
+    skill = {"id": "one", "name": "Design", "description": "Design help"}
+    assert await server.select_skill("design a page", [skill]) == skill
 
 
 def test_verify_key_uses_hash_and_consistent_read(monkeypatch):

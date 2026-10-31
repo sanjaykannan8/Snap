@@ -65,17 +65,29 @@ def get_skill_url(object_key: str) -> str:
 async def select_skill(problem: str, skills: list[dict]) -> dict | None:
     if not skills:
         return None
-    account = os.getenv("CLOUDFLARE_ACCOUNT_ID")
-    token = os.getenv("CLOUDFLARE_API_TOKEN")
-    if not account or not token:
-        raise RuntimeError("Workers AI is not configured")
-    model = os.getenv("CLOUDFLARE_CLEF_MODEL", "@cf/cloudflare/clef-flash")
-    if model not in ("@cf/cloudflare/clef", "@cf/cloudflare/clef-flash"):
-        raise RuntimeError("Unsupported Clef model")
+    provider = os.getenv("ROUTING_PROVIDER", "cloudflare").strip().lower()
+    if provider == "cloudflare":
+        account = os.getenv("CLOUDFLARE_ACCOUNT_ID")
+        token = os.getenv("CLOUDFLARE_API_TOKEN")
+        if not account or not token:
+            raise RuntimeError("Workers AI is not configured")
+        model = os.getenv("CLOUDFLARE_CLEF_MODEL", "@cf/cloudflare/clef-flash")
+        if model not in ("@cf/cloudflare/clef", "@cf/cloudflare/clef-flash"):
+            raise RuntimeError("Unsupported Clef model")
+        url = f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
+        request_model = model.rsplit("/", 1)[-1]
+    elif provider == "local":
+        url = os.getenv("LOCAL_SYSTEMONE_URL", "").strip()
+        if not url:
+            raise RuntimeError("LOCAL_SYSTEMONE_URL is not configured")
+        token = os.getenv("LOCAL_SYSTEMONE_API_KEY", "")
+        request_model = os.getenv("LOCAL_SYSTEMONE_MODEL", "Cloudflare/clef-flash")
+    else:
+        raise RuntimeError("ROUTING_PROVIDER must be cloudflare or local")
     threshold = float(os.getenv("SKILL_MATCH_THRESHOLD", "0.42"))
-    payload = {"model": model.rsplit("/", 1)[-1], "state": problem, "questions": {"skill": {"type": "choice", "instructions": "Which skill best solves this task? Select only when it is a strong fit.", "criteria": {s["id"]: f'{s["name"]}: {s["description"]}' for s in skills}}}}
+    payload = {"model": request_model, "state": problem, "questions": {"skill": {"type": "choice", "instructions": "Which skill best solves this task? Select only when it is a strong fit.", "criteria": {s["id"]: f'{s["name"]}: {s["description"]}' for s in skills}}}}
     async with httpx.AsyncClient(timeout=30) as client:
-        response = await client.post(f"https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}", headers={"Authorization": f"Bearer {token}"}, json=payload)
+        response = await client.post(url, headers={"Authorization": f"Bearer {token}"} if token else {}, json=payload)
         response.raise_for_status()
         data = response.json()
     answer = (data.get("result") or data).get("answers", {}).get("skill", {})
