@@ -141,7 +141,7 @@ function Stat({ label, value, hint, children }: { label: string; value: React.Re
   return (
     <div className="flex min-w-0 flex-col gap-1 p-5">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="truncate text-2xl font-semibold tracking-tight text-foreground tabular-nums">{value}</p>
+      <div className="truncate text-2xl font-semibold tracking-tight text-foreground tabular-nums">{value}</div>
       {children}
       {hint ? <p className="truncate text-xs text-muted-foreground">{hint}</p> : null}
     </div>
