@@ -18,7 +18,7 @@ const STEPS = [
   { title: "Agent describes the problem", text: "It calls get_skill(problem), the only tool it sees." },
   { title: "Decision model scores every skill", text: "Name + description, one pass, no text generated." },
   { title: "Confidence check", text: "Below the threshold, Snap returns “no skill” and the agent carries on." },
-  { title: "Winning skill comes back", text: "The agent receives a short-lived URL to the skill file." },
+  { title: "Winning skill comes back", text: "The agent receives the skill content and a short-lived download URL." },
 ]
 
 export function RouterDemo() {

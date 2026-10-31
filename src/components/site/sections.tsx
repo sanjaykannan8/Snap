@@ -89,7 +89,7 @@ const FAQ = [
   },
   {
     q: "What does the router actually read?",
-    a: "The task and each skill's name and description are sent to your configured Cloudflare or local decision model endpoint. For a match, the agent receives a short-lived URL to download the skill file.",
+    a: "The task and each skill's name and description are sent to your configured Cloudflare or local decision model endpoint. For a match, the agent receives the skill content and a short-lived HTTP download URL.",
   },
   {
     q: "Which agents can use it?",

@@ -12,6 +12,7 @@ def test_mcp_authentication_tool_and_revocation(monkeypatch):
     monkeypatch.setattr(server, "verify_api_key", lambda key: allowed.get(key))
     monkeypatch.setattr(server, "list_skills", lambda email: [{"id": "one", "name": "Design", "description": "Design help", "objectKey": "alice/skill.md"}] if email == "alice@example.com" else [])
     monkeypatch.setattr(server, "get_skill_url", lambda key: f"https://storage.example/{key}?signed=1")
+    monkeypatch.setattr(server, "read_skill_object", lambda key: "---\nname: Design\n---\nUse this skill.")
 
     async def match(problem, skills):
         assert problem == "design a page"
@@ -29,7 +30,9 @@ def test_mcp_authentication_tool_and_revocation(monkeypatch):
         tools = rpc(client, "tools/list", {}).json()["result"]["tools"]
         assert [tool["name"] for tool in tools] == ["get_skill"]
         result = rpc(client, "tools/call", {"name": "get_skill", "arguments": {"problem": "design a page"}}).json()["result"]
-        assert json.loads(result["content"][0]["text"])["url"].startswith("https://storage.example/alice/")
+        payload = json.loads(result["content"][0]["text"])
+        assert payload["url"].startswith("https://storage.example/alice/")
+        assert "Use this skill." in payload["content"]
         allowed.clear()
         assert rpc(client, "tools/list", {}).status_code == 401
 
@@ -76,3 +79,31 @@ def test_verify_key_uses_hash_and_consistent_read(monkeypatch):
     monkeypatch.setattr(server, "dynamodb_table", lambda: Table())
     assert server.verify_api_key(key) == "owner@example.com"
     assert server.verify_api_key("invalid") is None
+
+
+def test_presigned_url_uses_configured_public_host(monkeypatch):
+    monkeypatch.setenv("S3_PUBLIC_ENDPOINT", "http://172.16.48.33:9000")
+    monkeypatch.setenv("S3_ACCESS_KEY", "test-access")
+    monkeypatch.setenv("S3_SECRET_KEY", "test-secret")
+    monkeypatch.setenv("S3_BUCKET", "snap-skills")
+    url = server.get_skill_url("skills/example/SKILL.md")
+    assert url.startswith("http://172.16.48.33:9000/snap-skills/skills/example/SKILL.md?")
+    assert "X-Amz-Signature=" in url
+
+
+def test_read_skill_uses_internal_storage_endpoint(monkeypatch):
+    from io import BytesIO
+
+    monkeypatch.setenv("S3_ENDPOINT", "http://minio:9000")
+    monkeypatch.setenv("S3_ACCESS_KEY", "test-access")
+    monkeypatch.setenv("S3_SECRET_KEY", "test-secret")
+    def client(service, **kwargs):
+        assert service == "s3"
+        assert kwargs["endpoint_url"] == "http://minio:9000"
+        class Storage:
+            def get_object(self, **request):
+                assert request["Key"] == "skills/example/SKILL.md"
+                return {"Body": BytesIO(b"# Test skill")}
+        return Storage()
+    monkeypatch.setattr(server.boto3, "client", client)
+    assert server.read_skill_object("skills/example/SKILL.md") == "# Test skill"

@@ -18,7 +18,7 @@ One skill library for all your AI agents, with on-demand skill discovery.
 2. Connect an MCP client to the standalone service using the `X-Snap-API-Key` header.
 3. The agent calls `get_skill` with a short description of its task.
 4. Snap loads that user's skill metadata from DynamoDB and asks the configured decision model endpoint to select a match.
-5. If the match meets the confidence threshold, Snap returns a five-minute signed URL to the skill file. Otherwise, the agent continues without one.
+5. If the match meets the confidence threshold, Snap returns the skill content and a five-minute signed HTTP URL. Otherwise, the agent continues without one.
 
 Clef-flash is Cloudflare's 9B open-weight decision model: it returns probabilities for typed questions rather than generating text. Snap uses it by default; Clef is configurable. Older skills stored directly in DynamoDB are returned inline instead of by URL.
 
@@ -30,8 +30,7 @@ flowchart LR
     A[Agent / MCP client] -->|API key + get_skill| M[Standalone MCP service]
     M --> D
     M --> C[Cloudflare Workers AI or local System One]
-    M -->|Signed download URL| A
-    A -->|Download skill| S
+    M -->|Skill content and signed URL| A
 ```
 
 ## Quickstart
@@ -97,7 +96,7 @@ For a model server running on the Docker host, use `http://host.docker.internal:
 
 Compose binds to localhost by default. To make MCP and signed MinIO downloads reachable from another device, set `MCP_BIND_ADDRESS=0.0.0.0` and `S3_BIND_ADDRESS=0.0.0.0` in `.env`; set `S3_PUBLIC_ENDPOINT` to the reachable object-storage URL. When the dashboard is opened through the server's network address, it uses that address for the default MCP URL. Set `MCP_PUBLIC_URL` explicitly when the MCP service uses a different public address or HTTPS proxy. For example, on a trusted LAN, the URLs can use your server's LAN IP and ports 3100 and 9000. Set `WEB_BIND_ADDRESS=0.0.0.0` only if the dashboard also needs network access. If Next.js runs outside Compose, set `MCP_BIND_ADDRESS=0.0.0.0` in `.env.local` as well. DynamoDB and the MinIO console remain localhost-bound. Restart services after changing the settings.
 
-For access beyond a trusted local network, place the dashboard, MCP service, and object storage behind HTTPS and configure firewall rules and strong credentials. Clients must be able to reach the exact `S3_PUBLIC_ENDPOINT` used in the signed URL; it must not be `127.0.0.1` for an agent on another machine. Browser clients also need their origin in `MCP_ALLOWED_ORIGINS`.
+For access beyond a trusted local network, place the dashboard, MCP service, and object storage behind HTTPS and configure firewall rules and strong credentials. Clients using the optional signed HTTP URL must be able to reach the exact `S3_PUBLIC_ENDPOINT` used to sign it; it must not be `127.0.0.1` for an agent on another machine. Read the returned `content` field directly; the signed URL is not an MCP resource. Browser clients also need their origin in `MCP_ALLOWED_ORIGINS`.
 
 The Compose example defaults to `SESSION_COOKIE_SECURE=false` so login works over local HTTP, including a LAN IP. When serving the dashboard over HTTPS, set `SESSION_COOKIE_SECURE=true`. If a reverse proxy changes the host or terminates TLS, set `APP_ORIGIN` to the exact browser-facing dashboard origin, for example `https://snap.example.com` (no path or trailing slash). Without it, Snap checks the request's Host and protocol. Configure your proxy to reject unexpected hosts and strip untrusted forwarded headers. A browser client that sends an Origin to MCP must separately be included in `MCP_ALLOWED_ORIGINS`; a non-browser MCP client can omit Origin.
 
@@ -154,7 +153,7 @@ http_headers = { "X-Snap-API-Key" = "YOUR_API_KEY" }
 }
 ```
 
-Restart the client or start a new session after saving. The agent decides when to call the tool; a useful instruction for its configuration is: “At the start of a substantive task, call `get_skill` with a short description of the task. Read the returned skill if there is a match.”
+Restart the client or start a new session after saving. The agent decides when to call the tool; a useful instruction for its configuration is: “At the start of a substantive task, call `get_skill` with a short description of the task. Read the returned content field if there is a match.”
 
 ## Skill format
 
@@ -205,7 +204,7 @@ Skills contain instructions consumed by agents. Only publish and use skills you 
 ## Limitations and roadmap
 
 - Skills are single files; associated scripts and assets are not bundled.
-- New skills are delivered by signed URL; direct inline delivery for new files is a possible future improvement. Legacy DynamoDB-only skills are already returned inline.
+- Matching skills are returned inline with an optional signed URL; legacy DynamoDB-only skills are returned inline.
 - The current choice compares skills without an explicit “no skill applies” option. A confidence threshold is a weak no-match signal; an explicit option is a possible improvement.
 - Automatic fallback to larger Clef and an R2 deployment are not implemented.
 - The dashboard uses a 64-skill capacity. Clef's limits on options within a single choice need verification before promising larger libraries.

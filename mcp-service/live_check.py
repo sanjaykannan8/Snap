@@ -44,11 +44,13 @@ try:
         match = json.loads(result["content"][0]["text"])
         if match.get("name") != "pdf-extract":
             raise RuntimeError("Clef did not select the expected PDF skill")
+        if match.get("content") != content:
+            raise RuntimeError("Inline skill content did not match")
         download = httpx.get(match["url"], timeout=15)
         download.raise_for_status()
         if download.text != content:
             raise RuntimeError("Downloaded skill content did not match")
-        print("PASS: real MCP authentication, DynamoDB lookup, Clef selection, MinIO signing and download")
+        print("PASS: real MCP authentication, DynamoDB lookup, model selection, inline skill, MinIO signing and download")
 finally:
     for key in [key_record, *skill_keys]:
         table.delete_item(Key=key)

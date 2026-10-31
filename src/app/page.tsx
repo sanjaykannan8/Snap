@@ -28,7 +28,7 @@ export default function Home() {
             <div className="overflow-hidden rounded-3xl border border-border bg-white">
               <div className="border-b border-border px-6 py-4 text-xs font-semibold tracking-[0.12em] text-brand-ink uppercase">One library · multiple agents</div>
               <div className="grid gap-px bg-border sm:grid-cols-2">
-                {[ ["01", "Publish", "Add a SKILL.md in your dashboard."], ["02", "Connect", "Give each agent its own API key."], ["03", "Route", "Your agent calls get_skill(problem)."], ["04", "Read", "Fetch the matched skill from a short-lived URL."] ].map(([number, title, text]) => <div key={number} className="bg-white p-6"><span className="font-mono text-xs text-brand-ink">{number}</span><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{text}</p></div>)}
+                {[ ["01", "Publish", "Add a SKILL.md in your dashboard."], ["02", "Connect", "Give each agent its own API key."], ["03", "Route", "Your agent calls get_skill(problem)."], ["04", "Read", "Read the matched skill in the tool response."] ].map(([number, title, text]) => <div key={number} className="bg-white p-6"><span className="font-mono text-xs text-brand-ink">{number}</span><h3 className="mt-4 font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{text}</p></div>)}
               </div>
             </div>
           </div>

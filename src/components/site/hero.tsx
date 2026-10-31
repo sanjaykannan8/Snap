@@ -26,7 +26,7 @@ function LiveCall() {
       </p>
       <div className="mt-3 flex items-center justify-between rounded-lg bg-muted px-3 py-2">
         <span className="font-semibold text-foreground">→ pdf-extract</span>
-        <span className="text-brand-ink">signed URL</span>
+        <span className="text-brand-ink">skill content</span>
       </div>
     </div>
   )
