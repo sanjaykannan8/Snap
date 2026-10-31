@@ -33,74 +33,197 @@ flowchart LR
     M -->|Skill content and signed URL| A
 ```
 
-## Quickstart
+<a id="quickstart"></a>
 
-Run these commands on the machine that will host Snap. Both workflows work on **Linux, macOS, and Windows**. Install Git and Docker with the Compose plugin first; Docker Desktop is the usual choice on macOS and Windows. Start Docker before running the commands. For the frontend-only development workflow, also install Node.js 22 and npm.
+## Install Snap
 
-Get the repository, then run all setup commands from its root directory:
+Choose your operating system and follow its steps on the computer that will run Snap. Docker Compose starts the frontend, Python MCP server, DynamoDB Local, and MinIO; you do **not** need to install Python or Node.js for this setup.
 
-```bash
-git clone https://github.com/sanjaykannan8/Snap.git
-cd Snap
-```
+- [Windows](#windows-installation)
+- [Linux](#linux-installation)
+- [macOS](#macos-installation)
+- [Expose Snap on your network](#connect-from-another-machine)
 
-Choose **one** of the workflows below. By default, the dashboard is at [localhost:3000](http://localhost:3000) and MCP is at `http://127.0.0.1:3100/mcp`. To connect from another computer, follow [Connect from another machine](#connect-from-another-machine) before starting the stack.
+The first build downloads dependencies and may take several minutes. If an `.env` file already exists, keep it and edit it rather than overwriting it. Never commit `.env` or share your keys.
 
-### Option 1: Run everything with Docker Compose
+### Windows installation
 
-1. Create `.env` from the template. If `.env` already exists, edit it instead of overwriting it.
+1. Install [Git for Windows](https://git-scm.com/install/windows) and [Docker Desktop for Windows](https://docs.docker.com/desktop/setup/install/windows-install/). Follow Docker's installer instructions for WSL 2 if prompted. Open Docker Desktop and wait until it is running.
 
-Linux or macOS (terminal):
+2. Open **PowerShell**, then check Docker and download Snap:
 
-```bash
-cp .env.example .env
-```
+   ```powershell
+   docker --version
+   docker compose version
+   docker info
+   git clone https://github.com/sanjaykannan8/Snap.git
+   cd Snap
+   Copy-Item .env.example .env
+   ```
 
-Windows (PowerShell):
+   If `docker info` cannot connect, start Docker Desktop and try again. If the repository is already cloned, use `cd` to enter that existing folder rather than cloning again.
 
-```powershell
-Copy-Item .env.example .env
-```
+3. Open the configuration file:
 
-2. Open `.env` in a text editor. Replace `JWT_SECRET` with a random secret and choose **one** model provider:
+   ```powershell
+   notepad .env
+   ```
 
-```env
-# Cloudflare option: set these three values.
-ROUTING_PROVIDER=cloudflare
-CLOUDFLARE_ACCOUNT_ID=your_account_id
-CLOUDFLARE_API_TOKEN=your_workers_ai_token
-```
+   Generate a secret in PowerShell, then paste the resulting value into `JWT_SECRET` in Notepad:
 
-Or use an already running System One-compatible server:
+   ```powershell
+   $snapBytes = New-Object byte[] 32
+   [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($snapBytes)
+   -join ($snapBytes | ForEach-Object { $_.ToString('x2') })
+   ```
 
-```env
-ROUTING_PROVIDER=local
-LOCAL_SYSTEMONE_URL=http://YOUR_MODEL_HOST:30000/v1/systemone
-LOCAL_SYSTEMONE_MODEL=Cloudflare/clef-flash
-LOCAL_SYSTEMONE_API_KEY=local
-```
+   Choose **one** model configuration below and update its existing lines in `.env`:
 
-Replace `YOUR_MODEL_HOST` with the model server's reachable IP or hostname. This option does not start a model server. If it runs on the Docker host, use `host.docker.internal` instead of `localhost` in the Compose `.env` file. Set the API key only if the model server expects one.
+   ```env
+   # Option A: Cloudflare Workers AI
+   ROUTING_PROVIDER=cloudflare
+   CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID
+   CLOUDFLARE_API_TOKEN=YOUR_WORKERS_AI_TOKEN
+   ```
 
-To generate a `JWT_SECRET`, Linux and macOS users can run `openssl rand -hex 32`. In Windows PowerShell, run:
+   ```env
+   # Option B: an already running System One-compatible server
+   ROUTING_PROVIDER=local
+   LOCAL_SYSTEMONE_URL=http://YOUR_MODEL_HOST:30000/v1/systemone
+   LOCAL_SYSTEMONE_MODEL=Cloudflare/clef-flash
+   LOCAL_SYSTEMONE_API_KEY=local
+   ```
 
-```powershell
-$snapBytes = New-Object byte[] 32
-[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($snapBytes)
--join ($snapBytes | ForEach-Object { $_.ToString('x2') })
-```
+   For option B, replace `YOUR_MODEL_HOST` with the model server's IP or hostname; use `host.docker.internal` if it runs on this Windows host. Use the API key your model server expects, or leave it blank. Save and close Notepad. Snap does not install the model server.
 
-Paste the generated value into `.env` and keep the file private.
+4. Start Snap from the `Snap` directory:
 
-3. Start the full stack (the same command works on all three operating systems):
+   ```powershell
+   docker compose up -d --build
+   docker compose ps -a
+   ```
 
-```bash
-docker compose up --build
-```
+   The `init` service should finish successfully, while `web`, `mcp`, `minio`, and `dynamodb` run. Open [http://localhost:3000](http://localhost:3000), register, add a `SKILL.md`, and create a key under **Connections**. Configure your agent with the displayed MCP URL and key.
 
-Compose builds the Next.js frontend and standalone Python MCP images, starts DynamoDB Local and MinIO, and initializes the table and bucket. Leave it running, open [localhost:3000](http://localhost:3000), create an account, add a skill, and generate an agent key in **Connections**. The first build needs network access. Stop the stack with `docker compose down`; named volumes are retained.
+5. Check the server:
 
-### Option 2: Run the frontend locally, then start the MCP stack with Docker
+   ```powershell
+   Invoke-RestMethod http://127.0.0.1:3100/health
+   ```
+
+   The response should show `status: ok`. When finished, run `docker compose down` to stop Snap; its named database and storage volumes are preserved. To allow another computer to connect, see [Connect from another machine](#connect-from-another-machine).
+
+### Linux installation
+
+1. Install Git using your distribution's package manager and install either [Docker Desktop for Linux](https://docs.docker.com/desktop/setup/install/linux/) or [Docker Engine and the Compose plugin](https://docs.docker.com/engine/install/). Start Docker. Run the following commands in a terminal; if your Docker installation requires `sudo`, use your distribution's Docker instructions for access.
+
+   ```bash
+   git --version
+   docker --version
+   docker compose version
+   docker info
+   ```
+
+2. Download Snap and create its configuration:
+
+   ```bash
+   git clone https://github.com/sanjaykannan8/Snap.git
+   cd Snap
+   cp .env.example .env
+   ```
+
+   If already cloned, enter the existing directory; don't overwrite an existing `.env`.
+
+3. Generate a secret with `openssl rand -hex 32`. Open `.env` in your editor (for example, `nano .env`), paste the secret into `JWT_SECRET`, and choose one provider by updating the existing lines:
+
+   ```env
+   # Option A: Cloudflare Workers AI
+   ROUTING_PROVIDER=cloudflare
+   CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID
+   CLOUDFLARE_API_TOKEN=YOUR_WORKERS_AI_TOKEN
+   ```
+
+   ```env
+   # Option B: an already running System One-compatible server
+   ROUTING_PROVIDER=local
+   LOCAL_SYSTEMONE_URL=http://YOUR_MODEL_HOST:30000/v1/systemone
+   LOCAL_SYSTEMONE_MODEL=Cloudflare/clef-flash
+   LOCAL_SYSTEMONE_API_KEY=local
+   ```
+
+   For option B, replace `YOUR_MODEL_HOST` with the model server's IP or hostname; use `host.docker.internal` if it runs on this Linux host. Use the API key your server expects, or leave it blank. Save `.env`. Snap does not install the model server.
+
+4. Build and start Snap:
+
+   ```bash
+   docker compose up -d --build
+   docker compose ps -a
+   ```
+
+   The `init` service should finish successfully, while `web`, `mcp`, `minio`, and `dynamodb` run. Open [http://localhost:3000](http://localhost:3000), register, add a `SKILL.md`, and create a key under **Connections**. Configure your agent with the displayed MCP URL and key.
+
+5. Check the server:
+
+   ```bash
+   curl http://127.0.0.1:3100/health
+   ```
+
+   The response should contain `"status":"ok"`. When finished, run `docker compose down` to stop Snap; its named database and storage volumes are preserved. To allow another computer to connect, see [Connect from another machine](#connect-from-another-machine).
+
+### macOS installation
+
+1. Install Git (run `git --version` in Terminal and follow the macOS prompt if needed) and [Docker Desktop for Mac](https://docs.docker.com/desktop/setup/install/mac-install/). Select the installer for your Mac's Apple silicon or Intel processor. Open Docker Desktop and wait until it is running.
+
+2. In **Terminal**, verify Docker and download Snap:
+
+   ```bash
+   docker --version
+   docker compose version
+   docker info
+   git clone https://github.com/sanjaykannan8/Snap.git
+   cd Snap
+   cp .env.example .env
+   ```
+
+   If already cloned, enter the existing directory; don't overwrite an existing `.env`. If `docker info` cannot connect, start Docker Desktop and try again.
+
+3. Generate a secret with `openssl rand -hex 32`. Open `.env` in your editor (for example, `nano .env`), paste the secret into `JWT_SECRET`, and choose one provider by updating the existing lines:
+
+   ```env
+   # Option A: Cloudflare Workers AI
+   ROUTING_PROVIDER=cloudflare
+   CLOUDFLARE_ACCOUNT_ID=YOUR_ACCOUNT_ID
+   CLOUDFLARE_API_TOKEN=YOUR_WORKERS_AI_TOKEN
+   ```
+
+   ```env
+   # Option B: an already running System One-compatible server
+   ROUTING_PROVIDER=local
+   LOCAL_SYSTEMONE_URL=http://YOUR_MODEL_HOST:30000/v1/systemone
+   LOCAL_SYSTEMONE_MODEL=Cloudflare/clef-flash
+   LOCAL_SYSTEMONE_API_KEY=local
+   ```
+
+   For option B, replace `YOUR_MODEL_HOST` with the model server's IP or hostname; use `host.docker.internal` if it runs on this Mac. Use the API key your server expects, or leave it blank. Save `.env`. Snap does not install the model server.
+
+4. Build and start Snap:
+
+   ```bash
+   docker compose up -d --build
+   docker compose ps -a
+   ```
+
+   The `init` service should finish successfully, while `web`, `mcp`, `minio`, and `dynamodb` run. Open [http://localhost:3000](http://localhost:3000), register, add a `SKILL.md`, and create a key under **Connections**. Configure your agent with the displayed MCP URL and key.
+
+5. Check the server:
+
+   ```bash
+   curl http://127.0.0.1:3100/health
+   ```
+
+   The response should contain `"status":"ok"`. When finished, run `docker compose down` to stop Snap; its named database and storage volumes are preserved. To allow another computer to connect, see [Connect from another machine](#connect-from-another-machine).
+
+## Frontend development: run Next.js locally
 
 This is useful for frontend development. It requires Node.js 22+ and npm in addition to Docker; Python and uv are not required on the host.
 
@@ -137,7 +260,7 @@ docker compose up -d --build mcp
 
 Compose builds the Python MCP image and an initialization image, starts DynamoDB Local and MinIO, and creates the required table and bucket. It does not start the Dockerized web service, so the local frontend can use port 3000. The frontend may show connection errors until initialization completes. Check `docker compose ps` and `docker compose logs mcp` if needed; stop the containers with `docker compose down` when finished.
 
-For either option, open the dashboard, create an account, add a skill, and generate a connection key. In **Connections**, copy the setup for your agent; it uses `X-Snap-API-Key` for authentication. Localhost URLs work only from the same machine. For remote hosting, configure HTTPS and public MCP and storage URLs as described in [deployment notes](docs/backend.md).
+Open the dashboard, create an account, add a skill, and generate a connection key. In **Connections**, copy the setup for your agent; it uses `X-Snap-API-Key` for authentication. Localhost URLs work only from the same machine. For remote hosting, configure HTTPS and public MCP and storage URLs as described in [deployment notes](docs/backend.md).
 
 ### Choose a routing provider
 
@@ -148,7 +271,13 @@ Set these server-side variables in `.env` for Compose, and in `.env.local` as we
 
 For a model server running on the Docker host, use `http://host.docker.internal:30000/v1/systemone` in Compose. A Next.js process running directly on the host may instead need `http://127.0.0.1:30000/v1/systemone`. A model on another machine needs that machine's reachable address. Restart the services after changing these settings. Do not use a real key with an untrusted endpoint.
 
-### Connect from another machine
+<a id="connect-from-another-machine"></a>
+
+## Expose Snap on your network
+
+Follow these steps on the computer running Snap **after completing its installation**. This makes Snap reachable by another computer on a trusted LAN. The example uses `192.168.1.20` as the Snap host's address; substitute your actual address everywhere it appears. The other computer is called the *agent machine* below.
+
+### 1. Find the Snap host's IP
 
 By default, `127.0.0.1` means **the current machine**, so it cannot be used by an agent on another computer. Find the Snap host's LAN IP (not the agent's IP):
 
@@ -156,7 +285,9 @@ By default, `127.0.0.1` means **the current machine**, so it cannot be used by a
 - **macOS:** run `ipconfig getifaddr en0` for Wi-Fi, or find the active interface's address in System Settings → Network.
 - **Windows:** run `ipconfig` in PowerShell and find the IPv4 address of the active network adapter.
 
-On the Snap host, edit `.env`. This example assumes its LAN IP is `192.168.1.20`; replace that address with **your** Snap host's IP:
+### 2. Configure the host
+
+On the **Snap host**, open the `.env` file in the repository root. Use `notepad .env` in Windows PowerShell, or `nano .env` on Linux or macOS. Change the existing lines below (do not add a second copy of the same variable). Replace `192.168.1.20` with the IP you found:
 
 ```env
 WEB_BIND_ADDRESS=0.0.0.0
@@ -169,16 +300,34 @@ SESSION_COOKIE_SECURE=false
 
 `0.0.0.0` is a listening address; do not paste it into an agent configuration. The advertised URLs must use an address reachable from the other machine. You may leave `WEB_BIND_ADDRESS=127.0.0.1` if only the Snap host needs the dashboard. `S3_BIND_ADDRESS=0.0.0.0` and `S3_PUBLIC_ENDPOINT` are needed for clients to use the optional signed download URL; the MCP response also contains the skill content directly. DynamoDB and the MinIO console remain localhost-bound.
 
-If running Next.js outside Compose, copy the relevant `MCP_PUBLIC_URL` and `MCP_BIND_ADDRESS` settings to `.env.local` too. After changing `.env`, recreate the containers on the Snap host:
+Save `.env`. If running Next.js outside Compose, copy the relevant `MCP_PUBLIC_URL` and `MCP_BIND_ADDRESS` settings to `.env.local` too. `MCP_HOST` in `.env` does not control the Compose port binding; use `MCP_BIND_ADDRESS` above.
+
+### 3. Restart and check published ports
+
+On the **Snap host**, from the repository root, recreate the containers:
 
 ```bash
 docker compose up -d --build
-docker compose ps
+docker compose ps -a
 ```
 
 If you chose the local-frontend workflow, use `docker compose up -d --build mcp` instead of the first command so Compose does not also start the web container on port 3000.
 
-From the agent machine, open `http://192.168.1.20:3000` if the dashboard is exposed, or configure its MCP client with `http://192.168.1.20:3100/mcp` and the generated `X-Snap-API-Key`. Allow ports 3000 and 3100 through the host firewall as needed; port 9000 is needed only for signed downloads. A successful MCP connection and a reachable download endpoint are separate checks.
+In `docker compose ps -a`, check that `mcp` is running and its published port is `0.0.0.0:3100->3100/tcp`. The web and MinIO ports should similarly show `0.0.0.0:3000` and `0.0.0.0:9000` when enabled. An `init` container that exited successfully is expected. If startup fails, inspect `docker compose logs init mcp`.
+
+### 4. Allow access on your LAN
+
+Allow inbound TCP **3100** on the Snap host for MCP. Allow **3000** if you want to open the dashboard from the agent machine, and **9000** only if you want to use the signed download URL. Restrict access to your trusted network or known clients.
+
+- **Windows:** If Windows Defender Firewall blocks access, add inbound TCP port rules for the required ports on the private network profile. See [Microsoft's firewall guidance](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/rules).
+- **macOS:** Check macOS firewall and network security settings for Docker Desktop. Docker Desktop forwards published container ports through its backend process; see [Docker Desktop networking](https://docs.docker.com/desktop/features/networking/).
+- **Linux:** Check Docker's published-port firewall configuration and any upstream firewall. Docker-managed port rules can bypass UFW rules; see [Docker's firewall documentation](https://docs.docker.com/engine/network/packet-filtering-firewalls/).
+
+Binding `0.0.0.0` can make a port reachable on **all** network interfaces, including public interfaces. Use a specific LAN bind address or restrict access at the firewall/router as appropriate. For internet-facing access, use HTTPS and deployment-specific secrets.
+
+### 5. Test from the agent machine
+
+From the **agent machine**, open `http://192.168.1.20:3000` if the dashboard is exposed, or configure its MCP client with `http://192.168.1.20:3100/mcp` and the generated `X-Snap-API-Key`. A successful MCP connection and a reachable download endpoint are separate checks.
 
 For Compose, MinIO credentials are set by `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` in `.env`; Compose passes those values to the web and MCP containers. The `S3_ACCESS_KEY` and `S3_SECRET_KEY` settings in the example are for processes started outside Compose. Use matching values when mixing local and containerized processes.
 
