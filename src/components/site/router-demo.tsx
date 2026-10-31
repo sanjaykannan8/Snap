@@ -68,7 +68,7 @@ export function RouterDemo() {
         })}
         <p className="mt-2 px-4 text-xs leading-relaxed text-[#52524C]">
           This demo scores skills in your browser with a lightweight stand-in so you can feel the flow. The hosted
-          service uses Cloudflare&rsquo;s Clef-flash decision model; scores and timings shown here are illustrative.
+          service uses your configured Cloudflare or local model; scores and timings shown here are illustrative.
         </p>
       </ol>
 

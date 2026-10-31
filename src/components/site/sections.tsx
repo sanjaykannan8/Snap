@@ -11,7 +11,7 @@ const ROWS: { label: string; local: string | boolean; snap: string | boolean }[]
   { label: "Where skills live", local: "Depends on the agent", snap: "Your database and object store" },
   { label: "Multiple agents", local: "Depends on the agent", snap: "Connect agents to one account" },
   { label: "Skill discovery", local: "Depends on the agent", snap: "One: get_skill" },
-  { label: "Matching", local: "Depends on the agent", snap: "Cloudflare Workers AI" },
+  { label: "Matching", local: "Depends on the agent", snap: "Cloudflare or local model" },
   { label: "No-match handling", local: "Depends on the agent", snap: "Confidence threshold; imperfect" },
 ]
 
@@ -89,7 +89,7 @@ const FAQ = [
   },
   {
     q: "What does the router actually read?",
-    a: "The task and each skill's name and description are sent to Cloudflare Workers AI. For a match, the agent receives a short-lived URL to download the skill file.",
+    a: "The task and each skill's name and description are sent to your configured Cloudflare or local decision model endpoint. For a match, the agent receives a short-lived URL to download the skill file.",
   },
   {
     q: "Which agents can use it?",
@@ -97,7 +97,7 @@ const FAQ = [
   },
   {
     q: "Can I run it myself?",
-    a: "Yes. Docker Compose starts the dashboard, standalone Python MCP service, DynamoDB Local, and MinIO. Routing requests still use Cloudflare Workers AI.",
+    a: "Yes. Docker Compose starts the dashboard, standalone Python MCP service, DynamoDB Local, and MinIO. Configure routing to use Cloudflare Workers AI or an existing local System One-compatible endpoint.",
   },
 ]
 

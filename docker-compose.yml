@@ -2,7 +2,7 @@ services:
   web:
     build: .
     ports:
-      - "127.0.0.1:3000:3000"
+      - "${WEB_BIND_ADDRESS:-127.0.0.1}:3000:3000"
     environment:
       <<: &shared-env
         DYNAMODB_ENDPOINT: http://dynamodb:8000
@@ -16,24 +16,33 @@ services:
         S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-snaplocalpassword}
         CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID:-}
         CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
+        CLOUDFLARE_CLEF_MODEL: ${CLOUDFLARE_CLEF_MODEL:-@cf/cloudflare/clef-flash}
+        ROUTING_PROVIDER: ${ROUTING_PROVIDER:-cloudflare}
+        LOCAL_SYSTEMONE_URL: ${LOCAL_SYSTEMONE_URL:-}
+        LOCAL_SYSTEMONE_MODEL: ${LOCAL_SYSTEMONE_MODEL:-Cloudflare/clef-flash}
+        LOCAL_SYSTEMONE_API_KEY: ${LOCAL_SYSTEMONE_API_KEY:-}
+        SKILL_MATCH_THRESHOLD: ${SKILL_MATCH_THRESHOLD:-0.42}
       JWT_SECRET: ${JWT_SECRET:-local-development-only-change-this-secret}
       MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-http://127.0.0.1:3100/mcp}
     depends_on:
       init:
         condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   mcp:
     build: ./mcp-service
     ports:
-      - "127.0.0.1:3100:3100"
+      - "${MCP_BIND_ADDRESS:-127.0.0.1}:3100:3100"
     environment:
       <<: *shared-env
       MCP_HOST: 0.0.0.0
       MCP_PORT: 3100
-      SKILL_MATCH_THRESHOLD: ${SKILL_MATCH_THRESHOLD:-0.42}
-      CLOUDFLARE_CLEF_MODEL: ${CLOUDFLARE_CLEF_MODEL:-@cf/cloudflare/clef-flash}
+      MCP_ALLOWED_ORIGINS: ${MCP_ALLOWED_ORIGINS:-}
     depends_on:
       init:
         condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   init:
     build: .
     environment: *shared-env
@@ -48,7 +57,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-snaplocal}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-snaplocalpassword}
     ports:
-      - "127.0.0.1:9000:9000"
+      - "${S3_BIND_ADDRESS:-127.0.0.1}:9000:9000"
       - "127.0.0.1:9001:9001"
     volumes:
       - minio-data:/data

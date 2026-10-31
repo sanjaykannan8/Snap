@@ -18,7 +18,7 @@ The local DynamoDB single-table layout is intentionally small:
 
 ## Production boundaries
 
-- The Next.js server owns JWT verification, DynamoDB calls, and Cloudflare credentials.
+- The Next.js server owns JWT verification, DynamoDB calls, and routing-provider credentials.
 - `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, and `/api/auth/me` manage authentication.
 - `/api/skills` persists uploaded `SKILL.md` records.
 - `/api/route` loads the signed-in user’s skills then asks Workers AI to choose one. `SKILL_MATCH_THRESHOLD` prevents a weak model choice from returning a skill.
@@ -39,7 +39,7 @@ Run `uv run pytest` in `mcp-service` to test the MCP protocol and authentication
 
 ## Independent MCP deployment
 
-Run `uv run python server.py` from `mcp-service`; it listens on `127.0.0.1:3100` by default. `/health` is its process health endpoint. Set `MCP_PUBLIC_URL` on the web app to the public HTTPS MCP URL shown in the dashboard. Deploy `mcp-service/Dockerfile` independently and scale replicas behind an HTTPS load balancer. Every replica must use the same DynamoDB table, Cloudflare credentials, bucket and externally reachable `S3_PUBLIC_ENDPOINT`. Key revocations are checked against DynamoDB on each call. `MCP_ALLOWED_ORIGINS` is a comma-separated allowlist for browser clients that send an Origin header; non-browser MCP clients can omit Origin. Configure network access and secrets on each deployment.
+Run `uv run python server.py` from `mcp-service`; it listens on `127.0.0.1:3100` by default. `/health` is its process health endpoint. Set `MCP_PUBLIC_URL` on the web app to the public HTTPS MCP URL shown in the dashboard. Deploy `mcp-service/Dockerfile` independently and scale replicas behind an HTTPS load balancer. Every replica must use the same DynamoDB table, routing-provider settings, bucket and externally reachable `S3_PUBLIC_ENDPOINT`. Key revocations are checked against DynamoDB on each call. `MCP_ALLOWED_ORIGINS` is a comma-separated allowlist for browser clients that send an Origin header; non-browser MCP clients can omit Origin. Configure network access and secrets on each deployment. See the README for provider selection and network binding settings.
 
 ## Product diagrams
 

@@ -4,7 +4,7 @@ const features = [
   { icon: IconFileText, label: "Your library", title: "Publish a skill once", text: "Upload or paste a SKILL.md. Snap stores the file and uses its name and description for discovery.", detail: "SKILL.md  →  dashboard" },
   { icon: IconServer, label: "Independent service", title: "One MCP tool", text: "Run the Python MCP service separately and scale it independently from the Next.js dashboard.", detail: "get_skill(problem)" },
   { icon: IconKey, label: "Access", title: "A key for each agent", text: "Generate and revoke API keys in the dashboard. Connect Claude Code, Codex, Cursor, or VS Code.", detail: "X-Snap-API-Key" },
-  { icon: IconSparkles, label: "Discovery", title: "Return a relevant skill", text: "Cloudflare Workers AI selects a candidate. A match returns a short-lived URL to its skill file.", detail: "Clef-flash  →  signed URL" },
+  { icon: IconSparkles, label: "Discovery", title: "Return a relevant skill", text: "Choose Cloudflare Workers AI or a local System One-compatible model. A match returns a short-lived URL to its skill file.", detail: "Decision model  →  signed URL" },
 ]
 
 export function Bento() {

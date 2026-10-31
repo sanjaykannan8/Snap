@@ -39,7 +39,7 @@ export default function Home() {
             <SectionHeading
               eyebrow="How it works"
               title={<>Describe the task. Get the one skill that fits.</>}
-            lede="Try an illustrative local simulation of the routing flow. Your deployed service uses Cloudflare Workers AI."
+            lede="Try an illustrative routing simulation. Your deployed service uses your configured decision model."
             />
             <RouterDemo />
           </div>
