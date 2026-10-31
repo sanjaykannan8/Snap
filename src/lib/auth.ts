@@ -4,6 +4,7 @@ import { promisify } from "node:util"
 import { SignJWT, jwtVerify } from "jose"
 
 import { SESSION_COOKIE, SESSION_MAX_AGE_SECONDS } from "@/lib/auth-constants"
+import { secureSessionCookie } from "@/lib/request-security"
 
 const scrypt = promisify(scryptCallback)
 
@@ -43,7 +44,7 @@ export const sessionCookie = (value: string) => ({
   value,
   httpOnly: true,
   sameSite: "lax" as const,
-  secure: process.env.NODE_ENV === "production",
+  secure: secureSessionCookie(process.env.SESSION_COOKIE_SECURE, process.env.NODE_ENV),
   path: "/",
   maxAge: SESSION_MAX_AGE_SECONDS,
 })

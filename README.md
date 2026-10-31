@@ -95,9 +95,11 @@ For a model server running on the Docker host, use `http://host.docker.internal:
 
 ### Allow agents on your network
 
-Compose binds to localhost by default. To make MCP and signed MinIO downloads reachable from another device, set `MCP_BIND_ADDRESS=0.0.0.0` and `S3_BIND_ADDRESS=0.0.0.0` in `.env`; set `MCP_PUBLIC_URL` to the host's reachable URL ending in `/mcp` and `S3_PUBLIC_ENDPOINT` to the reachable object-storage URL. For example, on a trusted LAN, those URLs can use your server's LAN IP and ports 3100 and 9000. Set `WEB_BIND_ADDRESS=0.0.0.0` only if the dashboard also needs network access. DynamoDB and the MinIO console remain localhost-bound. Restart Compose after changing the settings.
+Compose binds to localhost by default. To make MCP and signed MinIO downloads reachable from another device, set `MCP_BIND_ADDRESS=0.0.0.0` and `S3_BIND_ADDRESS=0.0.0.0` in `.env`; set `S3_PUBLIC_ENDPOINT` to the reachable object-storage URL. When the dashboard is opened through the server's network address, it uses that address for the default MCP URL. Set `MCP_PUBLIC_URL` explicitly when the MCP service uses a different public address or HTTPS proxy. For example, on a trusted LAN, the URLs can use your server's LAN IP and ports 3100 and 9000. Set `WEB_BIND_ADDRESS=0.0.0.0` only if the dashboard also needs network access. If Next.js runs outside Compose, set `MCP_BIND_ADDRESS=0.0.0.0` in `.env.local` as well. DynamoDB and the MinIO console remain localhost-bound. Restart services after changing the settings.
 
 For access beyond a trusted local network, place the dashboard, MCP service, and object storage behind HTTPS and configure firewall rules and strong credentials. Clients must be able to reach the exact `S3_PUBLIC_ENDPOINT` used in the signed URL; it must not be `127.0.0.1` for an agent on another machine. Browser clients also need their origin in `MCP_ALLOWED_ORIGINS`.
+
+The Compose example defaults to `SESSION_COOKIE_SECURE=false` so login works over local HTTP, including a LAN IP. When serving the dashboard over HTTPS, set `SESSION_COOKIE_SECURE=true`. If a reverse proxy changes the host or terminates TLS, set `APP_ORIGIN` to the exact browser-facing dashboard origin, for example `https://snap.example.com` (no path or trailing slash). Without it, Snap checks the request's Host and protocol. Configure your proxy to reject unexpected hosts and strip untrusted forwarded headers. A browser client that sends an Origin to MCP must separately be included in `MCP_ALLOWED_ORIGINS`; a non-browser MCP client can omit Origin.
 
 ## Connect your agent
 
@@ -182,6 +184,8 @@ Use `.env.local` for the dashboard and `mcp-service/.env` for the Python service
 | `S3_REGION`, `S3_BUCKET` | Object-storage region and shared bucket. |
 | `S3_ACCESS_KEY`, `S3_SECRET_KEY` | Server-side object-storage credentials. |
 | `JWT_SECRET` | Dashboard session signing secret. |
+| `SESSION_COOKIE_SECURE` | `false` for local HTTP; set `true` for HTTPS. Outside Compose, defaults to true in production. |
+| `APP_ORIGIN` | Optional exact browser-facing dashboard origin for reverse-proxy deployments. |
 | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | Workers AI credentials for the MCP service; also needed by the web app's routing API if used. |
 | `CLOUDFLARE_CLEF_MODEL` | Clef model identifier; defaults to `@cf/cloudflare/clef-flash`. |
 | `ROUTING_PROVIDER` | `cloudflare` (default) or `local`. |
@@ -194,7 +198,7 @@ Use `.env.local` for the dashboard and `mcp-service/.env` for the Python service
 
 ## Security model
 
-The dashboard uses signed JWTs in `HttpOnly`, `SameSite=Lax` cookies, with `Secure` enabled in production. MCP keys are account-scoped; Snap stores their SHA-256 hashes and checks them on requests. Skill download URLs expire after five minutes. Revoking a key prevents later MCP calls, but does not invalidate URLs already issued.
+The dashboard uses signed JWTs in `HttpOnly`, `SameSite=Lax` cookies. Set `SESSION_COOKIE_SECURE=true` for HTTPS; Compose defaults to false for local HTTP. MCP keys are account-scoped; Snap stores their SHA-256 hashes and checks them on requests. Skill download URLs expire after five minutes. Revoking a key prevents later MCP calls, but does not invalidate URLs already issued.
 
 Skills contain instructions consumed by agents. Only publish and use skills you trust, and review them before applying their instructions.
 

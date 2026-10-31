@@ -1,6 +1,6 @@
 # Snap backend
 
-Snap is a stateless web application: a signed JWT is issued after login and kept in an `HttpOnly`, `Secure` (in production), `SameSite=Lax` cookie. The browser cannot read the token. API routes verify it independently, so no server-side session store is required.
+Snap is a stateless web application: a signed JWT is issued after login and kept in an `HttpOnly`, `SameSite=Lax` cookie. The browser cannot read the token. API routes verify it independently, so no server-side session store is required. Compose defaults to `SESSION_COOKIE_SECURE=false` for local HTTP; set it to `true` for HTTPS deployments. Outside Compose, the default is secure in production. Set `APP_ORIGIN` to the exact external dashboard origin if a reverse proxy changes the host or terminates TLS.
 
 ## Local development
 

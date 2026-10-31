@@ -23,7 +23,10 @@ services:
         LOCAL_SYSTEMONE_API_KEY: ${LOCAL_SYSTEMONE_API_KEY:-}
         SKILL_MATCH_THRESHOLD: ${SKILL_MATCH_THRESHOLD:-0.42}
       JWT_SECRET: ${JWT_SECRET:-local-development-only-change-this-secret}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      APP_ORIGIN: ${APP_ORIGIN:-}
       MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-http://127.0.0.1:3100/mcp}
+      MCP_BIND_ADDRESS: ${MCP_BIND_ADDRESS:-127.0.0.1}
     depends_on:
       init:
         condition: service_completed_successfully

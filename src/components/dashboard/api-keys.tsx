@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { InlineConfirm, PageHeader, Panel, Skeleton } from "@/components/dashboard/primitives"
+import { resolveMcpUrl } from "@/lib/mcp-url"
 import { cn } from "@/lib/utils"
 
 type Key = { id: string; name: string; prefix: string; createdAt: string }
@@ -79,8 +80,8 @@ export function ApiKeys({ endpoint: initialEndpoint }: { endpoint: string }) {
     let active = true
     fetch("/api/mcp-config", { cache: "no-store" }).then(async (response) => {
       if (!response.ok) throw new Error("Could not load server address.")
-      const data = await response.json() as { url: string }
-      if (active) setEndpoint(data.url)
+      const data = await response.json() as { url: string; networkExposed: boolean }
+      if (active) setEndpoint(resolveMcpUrl(data.url, data.networkExposed, window.location.hostname))
     }).catch(() => { if (active) setError("Could not load the server address. Refresh to try again.") })
     fetch("/api/keys", { cache: "no-store" }).then(async (response) => {
       if (!response.ok) throw new Error("Could not load your connections.")
@@ -119,7 +120,20 @@ export function ApiKeys({ endpoint: initialEndpoint }: { endpoint: string }) {
 
   async function copy(value: string, target: CopyTarget) {
     try {
-      await navigator.clipboard.writeText(value)
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(value)
+      } else {
+        const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        const field = document.createElement("textarea")
+        field.value = value
+        field.setAttribute("readonly", "")
+        field.style.position = "fixed"
+        field.style.opacity = "0"
+        document.body.appendChild(field)
+        field.select()
+        try { if (!document.execCommand("copy")) throw new Error("Copy unavailable") }
+        finally { field.remove(); previous?.focus() }
+      }
       setCopyFailed(null)
       setCopied(target)
       window.clearTimeout(copyTimer.current)
