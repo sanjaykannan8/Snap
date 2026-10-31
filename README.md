@@ -35,29 +35,85 @@ flowchart LR
 
 ## Quickstart
 
-Choose **one** of the following local workflows. Both expose the dashboard at [localhost:3000](http://localhost:3000) and the MCP endpoint at `http://127.0.0.1:3100/mcp`. Docker Desktop (or Docker Engine with Compose) must be running. Routing can use Cloudflare Workers AI or a local System One-compatible endpoint; configure one as described below.
+Run these commands on the machine that will host Snap. Both workflows work on **Linux, macOS, and Windows**. Install Git and Docker with the Compose plugin first; Docker Desktop is the usual choice on macOS and Windows. Start Docker before running the commands. For the frontend-only development workflow, also install Node.js 22 and npm.
+
+Get the repository, then run all setup commands from its root directory:
+
+```bash
+git clone https://github.com/sanjaykannan8/Snap.git
+cd Snap
+```
+
+Choose **one** of the workflows below. By default, the dashboard is at [localhost:3000](http://localhost:3000) and MCP is at `http://127.0.0.1:3100/mcp`. To connect from another computer, follow [Connect from another machine](#connect-from-another-machine) before starting the stack.
 
 ### Option 1: Run everything with Docker Compose
 
-Copy `.env.example` to `.env`, then set `JWT_SECRET` and your chosen routing provider's settings in `.env`. For example, in PowerShell:
+1. Create `.env` from the template. If `.env` already exists, edit it instead of overwriting it.
+
+Linux or macOS (terminal):
+
+```bash
+cp .env.example .env
+```
+
+Windows (PowerShell):
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Start the full stack:
+2. Open `.env` in a text editor. Replace `JWT_SECRET` with a random secret and choose **one** model provider:
+
+```env
+# Cloudflare option: set these three values.
+ROUTING_PROVIDER=cloudflare
+CLOUDFLARE_ACCOUNT_ID=your_account_id
+CLOUDFLARE_API_TOKEN=your_workers_ai_token
+```
+
+Or use an already running System One-compatible server:
+
+```env
+ROUTING_PROVIDER=local
+LOCAL_SYSTEMONE_URL=http://YOUR_MODEL_HOST:30000/v1/systemone
+LOCAL_SYSTEMONE_MODEL=Cloudflare/clef-flash
+LOCAL_SYSTEMONE_API_KEY=local
+```
+
+Replace `YOUR_MODEL_HOST` with the model server's reachable IP or hostname. This option does not start a model server. If it runs on the Docker host, use `host.docker.internal` instead of `localhost` in the Compose `.env` file. Set the API key only if the model server expects one.
+
+To generate a `JWT_SECRET`, Linux and macOS users can run `openssl rand -hex 32`. In Windows PowerShell, run:
+
+```powershell
+$snapBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($snapBytes)
+-join ($snapBytes | ForEach-Object { $_.ToString('x2') })
+```
+
+Paste the generated value into `.env` and keep the file private.
+
+3. Start the full stack (the same command works on all three operating systems):
 
 ```bash
 docker compose up --build
 ```
 
-Compose builds the Next.js frontend and standalone Python MCP images, starts DynamoDB Local and MinIO, and initializes the table and bucket. Leave it running, then open [localhost:3000](http://localhost:3000). The first build needs network access. Stop the stack with `docker compose down`; named volumes are retained.
+Compose builds the Next.js frontend and standalone Python MCP images, starts DynamoDB Local and MinIO, and initializes the table and bucket. Leave it running, open [localhost:3000](http://localhost:3000), create an account, add a skill, and generate an agent key in **Connections**. The first build needs network access. Stop the stack with `docker compose down`; named volumes are retained.
 
 ### Option 2: Run the frontend locally, then start the MCP stack with Docker
 
-This is useful for frontend development. It requires Node.js 22+ and npm in addition to Docker; Python and uv are not required on the host. These commands use PowerShell.
+This is useful for frontend development. It requires Node.js 22+ and npm in addition to Docker; Python and uv are not required on the host.
 
-1. Copy the example configuration for Next.js and Compose:
+1. Copy the example configuration for Next.js and Compose. Skip copying a file that already exists so you don't overwrite its settings.
+
+Linux or macOS:
+
+```bash
+cp .env.example .env.local
+cp .env.example .env
+```
+
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env.local
@@ -92,9 +148,53 @@ Set these server-side variables in `.env` for Compose, and in `.env.local` as we
 
 For a model server running on the Docker host, use `http://host.docker.internal:30000/v1/systemone` in Compose. A Next.js process running directly on the host may instead need `http://127.0.0.1:30000/v1/systemone`. A model on another machine needs that machine's reachable address. Restart the services after changing these settings. Do not use a real key with an untrusted endpoint.
 
-### Allow agents on your network
+### Connect from another machine
 
-Compose binds to localhost by default. To make MCP and signed MinIO downloads reachable from another device, set `MCP_BIND_ADDRESS=0.0.0.0` and `S3_BIND_ADDRESS=0.0.0.0` in `.env`; set `S3_PUBLIC_ENDPOINT` to the reachable object-storage URL. When the dashboard is opened through the server's network address, it uses that address for the default MCP URL. Set `MCP_PUBLIC_URL` explicitly when the MCP service uses a different public address or HTTPS proxy. For example, on a trusted LAN, the URLs can use your server's LAN IP and ports 3100 and 9000. Set `WEB_BIND_ADDRESS=0.0.0.0` only if the dashboard also needs network access. If Next.js runs outside Compose, set `MCP_BIND_ADDRESS=0.0.0.0` in `.env.local` as well. DynamoDB and the MinIO console remain localhost-bound. Restart services after changing the settings.
+By default, `127.0.0.1` means **the current machine**, so it cannot be used by an agent on another computer. Find the Snap host's LAN IP (not the agent's IP):
+
+- **Linux:** run `hostname -I` and select the address on your LAN.
+- **macOS:** run `ipconfig getifaddr en0` for Wi-Fi, or find the active interface's address in System Settings → Network.
+- **Windows:** run `ipconfig` in PowerShell and find the IPv4 address of the active network adapter.
+
+On the Snap host, edit `.env`. This example assumes its LAN IP is `192.168.1.20`; replace that address with **your** Snap host's IP:
+
+```env
+WEB_BIND_ADDRESS=0.0.0.0
+MCP_BIND_ADDRESS=0.0.0.0
+S3_BIND_ADDRESS=0.0.0.0
+MCP_PUBLIC_URL=http://192.168.1.20:3100/mcp
+S3_PUBLIC_ENDPOINT=http://192.168.1.20:9000
+SESSION_COOKIE_SECURE=false
+```
+
+`0.0.0.0` is a listening address; do not paste it into an agent configuration. The advertised URLs must use an address reachable from the other machine. You may leave `WEB_BIND_ADDRESS=127.0.0.1` if only the Snap host needs the dashboard. `S3_BIND_ADDRESS=0.0.0.0` and `S3_PUBLIC_ENDPOINT` are needed for clients to use the optional signed download URL; the MCP response also contains the skill content directly. DynamoDB and the MinIO console remain localhost-bound.
+
+If running Next.js outside Compose, copy the relevant `MCP_PUBLIC_URL` and `MCP_BIND_ADDRESS` settings to `.env.local` too. After changing `.env`, recreate the containers on the Snap host:
+
+```bash
+docker compose up -d --build
+docker compose ps
+```
+
+If you chose the local-frontend workflow, use `docker compose up -d --build mcp` instead of the first command so Compose does not also start the web container on port 3000.
+
+From the agent machine, open `http://192.168.1.20:3000` if the dashboard is exposed, or configure its MCP client with `http://192.168.1.20:3100/mcp` and the generated `X-Snap-API-Key`. Allow ports 3000 and 3100 through the host firewall as needed; port 9000 is needed only for signed downloads. A successful MCP connection and a reachable download endpoint are separate checks.
+
+For Compose, MinIO credentials are set by `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD` in `.env`; Compose passes those values to the web and MCP containers. The `S3_ACCESS_KEY` and `S3_SECRET_KEY` settings in the example are for processes started outside Compose. Use matching values when mixing local and containerized processes.
+
+To check the MCP service from another machine, replace the example IP and run one of these commands:
+
+```bash
+# Linux or macOS
+curl http://192.168.1.20:3100/health
+```
+
+```powershell
+# Windows PowerShell
+Invoke-RestMethod http://192.168.1.20:3100/health
+```
+
+The response should contain `"status":"ok"`. This checks connectivity only; the MCP client also needs a valid key. In OpenCode, `opencode mcp list` shows whether the configured server connected. If a signed URL shows `127.0.0.1`, check `S3_PUBLIC_ENDPOINT` in the **Compose `.env` on the Snap host**, recreate the MCP container, and ask for the skill again. Do not replace the hostname in an already signed URL: the host is part of the signature. Read the `content` field returned by `get_skill`; an HTTP URL is not an MCP resource.
 
 For access beyond a trusted local network, place the dashboard, MCP service, and object storage behind HTTPS and configure firewall rules and strong credentials. Clients using the optional signed HTTP URL must be able to reach the exact `S3_PUBLIC_ENDPOINT` used to sign it; it must not be `127.0.0.1` for an agent on another machine. Read the returned `content` field directly; the signed URL is not an MCP resource. Browser clients also need their origin in `MCP_ALLOWED_ORIGINS`.
 
@@ -102,7 +202,24 @@ The Compose example defaults to `SESSION_COOKIE_SECURE=false` so login works ove
 
 ## Connect your agent
 
-The dashboard's connection panel produces these configurations with your endpoint and new key. A key is shown once; copy it before dismissing the panel. Keep populated configurations private and merge entries into existing settings instead of overwriting them.
+The dashboard's connection panel produces configurations for Claude Code, Codex, Cursor, and VS Code with your endpoint and new key. OpenCode can use the example below. A key is shown once; copy it before dismissing the panel. Keep populated configurations private and merge entries into existing settings instead of overwriting them.
+
+**OpenCode** — add to your OpenCode configuration (for example, `~/.config/opencode/opencode.json`):
+
+```json
+{
+  "mcp": {
+    "snap": {
+      "type": "remote",
+      "url": "http://192.168.1.20:3100/mcp",
+      "enabled": true,
+      "headers": { "X-Snap-API-Key": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+Replace the example IP with the Snap host's IP, or use `http://127.0.0.1:3100/mcp` when OpenCode runs on the Snap host. Merge `snap` into an existing `mcp` object, keep the key private, and do not commit a file containing it. Restart OpenCode and check `opencode mcp list`. See [OpenCode's MCP documentation](https://opencode.ai/docs/en/mcp-servers/) for its configuration options.
 
 **Claude Code** — add to your project's `.mcp.json` (do not commit a file containing your key):
 
