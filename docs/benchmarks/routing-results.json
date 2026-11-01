@@ -1,0 +1,695 @@
+{
+  "created_at": "2026-11-01T08:55:09.923653+00:00",
+  "model_requested": "Cloudflare/clef-flash",
+  "provider": "local System One; remote LAN inference",
+  "threshold": 0.42,
+  "seed": 20261101,
+  "repeats": 2,
+  "warmups_per_size": 1,
+  "client_platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.4",
+  "fixture_sha256": "176fb9cc9c4fdec6c8d29e634c8926895856f8cdcb694ef8803629b50dad4d93",
+  "timing_scope": "Warm sequential HTTP tools/call round trip: API-key validation, DynamoDB catalog lookup, live model inference, matched object read, URL signing, MCP serialization. Excludes initialization, warm-ups, agent reasoning and optional URL download.",
+  "summary": [
+    {
+      "skills": 10,
+      "positive_correct": 16,
+      "positive_total": 16,
+      "no_match_correct": 8,
+      "no_match_total": 8,
+      "p50_ms": 372.149,
+      "p95_ms": 583.202,
+      "errors": 0
+    },
+    {
+      "skills": 30,
+      "positive_correct": 16,
+      "positive_total": 16,
+      "no_match_correct": 8,
+      "no_match_total": 8,
+      "p50_ms": 495.012,
+      "p95_ms": 611.767,
+      "errors": 0
+    },
+    {
+      "skills": 64,
+      "positive_correct": 16,
+      "positive_total": 16,
+      "no_match_correct": 6,
+      "no_match_total": 8,
+      "p50_ms": 552.904,
+      "p95_ms": 713.363,
+      "errors": 0
+    }
+  ],
+  "results": [
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "What is the capital of Portugal?",
+      "expected": null,
+      "latency_ms": 489.349,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks",
+      "latency_ms": 492.903,
+      "selected": "stripe-webhooks",
+      "confidence": 0.9913964027485841
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null,
+      "latency_ms": 456.568,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review",
+      "latency_ms": 302.122,
+      "selected": "sql-review",
+      "confidence": 0.9804089433303358
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract",
+      "latency_ms": 286.452,
+      "selected": "pdf-extract",
+      "confidence": 0.9832170743500921
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y",
+      "latency_ms": 272.925,
+      "selected": "react-a11y",
+      "confidence": 0.9788033436498588
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null,
+      "latency_ms": 251.231,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug",
+      "latency_ms": 583.202,
+      "selected": "docker-debug",
+      "confidence": 0.9890978506134426
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null,
+      "latency_ms": 439.935,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes",
+      "latency_ms": 301.11,
+      "selected": "release-notes",
+      "confidence": 0.9929867553790768
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem",
+      "latency_ms": 308.736,
+      "selected": "incident-postmortem",
+      "confidence": 0.9885558389249292
+    },
+    {
+      "size": 10,
+      "repeat": 1,
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean",
+      "latency_ms": 281.932,
+      "selected": "csv-clean",
+      "confidence": 0.9755512975034176
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null,
+      "latency_ms": 230.291,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean",
+      "latency_ms": 281.5,
+      "selected": "csv-clean",
+      "confidence": 0.9755512975034176
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes",
+      "latency_ms": 332.625,
+      "selected": "release-notes",
+      "confidence": 0.9929867553790768
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null,
+      "latency_ms": 391.382,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null,
+      "latency_ms": 313.531,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "What is the capital of Portugal?",
+      "expected": null,
+      "latency_ms": 424.157,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y",
+      "latency_ms": 593.811,
+      "selected": "react-a11y",
+      "confidence": 0.9788033436498588
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review",
+      "latency_ms": 462.748,
+      "selected": "sql-review",
+      "confidence": 0.9804089433303358
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks",
+      "latency_ms": 362.738,
+      "selected": "stripe-webhooks",
+      "confidence": 0.9913964027485841
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug",
+      "latency_ms": 490.679,
+      "selected": "docker-debug",
+      "confidence": 0.9890978506134426
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract",
+      "latency_ms": 460.335,
+      "selected": "pdf-extract",
+      "confidence": 0.9832170743500921
+    },
+    {
+      "size": 10,
+      "repeat": 2,
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem",
+      "latency_ms": 381.559,
+      "selected": "incident-postmortem",
+      "confidence": 0.9885558389249292
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null,
+      "latency_ms": 376.765,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "What is the capital of Portugal?",
+      "expected": null,
+      "latency_ms": 526.062,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null,
+      "latency_ms": 505.928,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem",
+      "latency_ms": 552.426,
+      "selected": "incident-postmortem",
+      "confidence": 0.9763178587430432
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract",
+      "latency_ms": 538.197,
+      "selected": "pdf-extract",
+      "confidence": 0.976998417955611
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean",
+      "latency_ms": 611.767,
+      "selected": "csv-clean",
+      "confidence": 0.9630716256931741
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y",
+      "latency_ms": 510.081,
+      "selected": "react-a11y",
+      "confidence": 0.9558837413733339
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug",
+      "latency_ms": 518.359,
+      "selected": "docker-debug",
+      "confidence": 0.9748923653672887
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null,
+      "latency_ms": 445.802,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes",
+      "latency_ms": 484.097,
+      "selected": "release-notes",
+      "confidence": 0.9876872023762714
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks",
+      "latency_ms": 517.534,
+      "selected": "stripe-webhooks",
+      "confidence": 0.9813502060017595
+    },
+    {
+      "size": 30,
+      "repeat": 1,
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review",
+      "latency_ms": 624.293,
+      "selected": "sql-review",
+      "confidence": 0.9612535163863146
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem",
+      "latency_ms": 565.036,
+      "selected": "incident-postmortem",
+      "confidence": 0.9763178587430432
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract",
+      "latency_ms": 387.773,
+      "selected": "pdf-extract",
+      "confidence": 0.976998417955611
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "What is the capital of Portugal?",
+      "expected": null,
+      "latency_ms": 329.656,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean",
+      "latency_ms": 337.094,
+      "selected": "csv-clean",
+      "confidence": 0.9630716256931741
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review",
+      "latency_ms": 404.105,
+      "selected": "sql-review",
+      "confidence": 0.9612535163863146
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks",
+      "latency_ms": 558.518,
+      "selected": "stripe-webhooks",
+      "confidence": 0.9813502060017595
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null,
+      "latency_ms": 575.751,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y",
+      "latency_ms": 361.331,
+      "selected": "react-a11y",
+      "confidence": 0.9558837413733339
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug",
+      "latency_ms": 405.156,
+      "selected": "docker-debug",
+      "confidence": 0.9748923653672887
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null,
+      "latency_ms": 305.656,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes",
+      "latency_ms": 325.725,
+      "selected": "release-notes",
+      "confidence": 0.9876872023762714
+    },
+    {
+      "size": 30,
+      "repeat": 2,
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null,
+      "latency_ms": 329.013,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract",
+      "latency_ms": 534.587,
+      "selected": "pdf-extract",
+      "confidence": 0.962201908146808
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks",
+      "latency_ms": 534.817,
+      "selected": "stripe-webhooks",
+      "confidence": 0.9659356612880996
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review",
+      "latency_ms": 766.478,
+      "selected": "sql-review",
+      "confidence": 0.9429557900152469
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean",
+      "latency_ms": 632.912,
+      "selected": "csv-clean",
+      "confidence": 0.946194018069673
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y",
+      "latency_ms": 568.915,
+      "selected": "react-a11y",
+      "confidence": 0.9380490441899453
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes",
+      "latency_ms": 691.921,
+      "selected": "release-notes",
+      "confidence": 0.9808484433914748
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem",
+      "latency_ms": 456.577,
+      "selected": "incident-postmortem",
+      "confidence": 0.9674865152813541
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null,
+      "latency_ms": 439.755,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug",
+      "latency_ms": 455.855,
+      "selected": "docker-debug",
+      "confidence": 0.9666342398794312
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "What is the capital of Portugal?",
+      "expected": null,
+      "latency_ms": 555.442,
+      "selected": "translation",
+      "confidence": 0.4563443220247447
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null,
+      "latency_ms": 454.492,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 64,
+      "repeat": 1,
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null,
+      "latency_ms": 472.979,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null,
+      "latency_ms": 439.689,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem",
+      "latency_ms": 469.642,
+      "selected": "incident-postmortem",
+      "confidence": 0.9674865152813541
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean",
+      "latency_ms": 585.659,
+      "selected": "csv-clean",
+      "confidence": 0.946194018069673
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks",
+      "latency_ms": 713.363,
+      "selected": "stripe-webhooks",
+      "confidence": 0.9659356612880996
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null,
+      "latency_ms": 628.453,
+      "selected": null,
+      "confidence": null
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y",
+      "latency_ms": 630.457,
+      "selected": "react-a11y",
+      "confidence": 0.9380490441899453
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug",
+      "latency_ms": 552.718,
+      "selected": "docker-debug",
+      "confidence": 0.9666342398794312
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract",
+      "latency_ms": 569.477,
+      "selected": "pdf-extract",
+      "confidence": 0.962201908146808
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review",
+      "latency_ms": 553.09,
+      "selected": "sql-review",
+      "confidence": 0.9429557900152469
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "What is the capital of Portugal?",
+      "expected": null,
+      "latency_ms": 510.044,
+      "selected": "translation",
+      "confidence": 0.4563443220247447
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes",
+      "latency_ms": 634.509,
+      "selected": "release-notes",
+      "confidence": 0.9808484433914748
+    },
+    {
+      "size": 64,
+      "repeat": 2,
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null,
+      "latency_ms": 531.412,
+      "selected": null,
+      "confidence": null
+    }
+  ]
+}

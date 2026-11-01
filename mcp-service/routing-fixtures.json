@@ -1,0 +1,311 @@
+{
+  "description": "Synthetic public smoke fixtures: eight target skills, 56 related software/content distractors, eight in-scope and four out-of-scope tasks. Not a held-out production dataset.",
+  "skills": [
+    {
+      "name": "pdf-extract",
+      "description": "Extract text, tables and form fields from PDF files, including scanned PDFs that need OCR."
+    },
+    {
+      "name": "sql-review",
+      "description": "Review SQL queries and database migrations for slow joins, missing indexes and N+1 query patterns."
+    },
+    {
+      "name": "release-notes",
+      "description": "Write changelog and release notes from merged pull requests and commits, grouped by feature and fix."
+    },
+    {
+      "name": "react-a11y",
+      "description": "Audit React components for accessibility: keyboard navigation, focus, aria labels and colour contrast."
+    },
+    {
+      "name": "csv-clean",
+      "description": "Clean messy CSV and spreadsheet data: fix headers, dedupe rows, normalise dates and currency columns."
+    },
+    {
+      "name": "incident-postmortem",
+      "description": "Run an incident response and write a blameless postmortem with timeline, root cause and action items."
+    },
+    {
+      "name": "stripe-webhooks",
+      "description": "Implement and debug Stripe webhook handlers: signature verification, retries and idempotent payment events."
+    },
+    {
+      "name": "docker-debug",
+      "description": "Debug Docker builds and containers: failing layers, image size, networking and crashing containers."
+    },
+    {
+      "name": "word-edit",
+      "description": "Create and format Word documents, including tracked edits and comments."
+    },
+    {
+      "name": "excel-formulas",
+      "description": "Build spreadsheet formulas, pivot tables and conditional formatting."
+    },
+    {
+      "name": "python-tests",
+      "description": "Write pytest unit and integration tests for Python services."
+    },
+    {
+      "name": "react-performance",
+      "description": "Profile React rendering and reduce unnecessary component updates."
+    },
+    {
+      "name": "api-design",
+      "description": "Design REST endpoints, request validation and consistent error responses."
+    },
+    {
+      "name": "postgres-backup",
+      "description": "Back up PostgreSQL databases and restore point-in-time snapshots."
+    },
+    {
+      "name": "kubernetes-debug",
+      "description": "Diagnose Kubernetes pod restarts, failed probes and service discovery."
+    },
+    {
+      "name": "git-conflicts",
+      "description": "Resolve Git merge conflicts and inspect divergent branch histories."
+    },
+    {
+      "name": "terraform-review",
+      "description": "Review Terraform infrastructure plans, resource changes and state management."
+    },
+    {
+      "name": "aws-iam",
+      "description": "Create least-privilege IAM policies and investigate denied AWS actions."
+    },
+    {
+      "name": "github-actions",
+      "description": "Build CI workflows for GitHub Actions with caching and deployment jobs."
+    },
+    {
+      "name": "node-memory",
+      "description": "Investigate Node.js heap growth, garbage collection and memory leaks."
+    },
+    {
+      "name": "css-layout",
+      "description": "Fix CSS grid, flexbox and responsive layout overflow."
+    },
+    {
+      "name": "typescript-types",
+      "description": "Model TypeScript generics, discriminated unions and inferred types."
+    },
+    {
+      "name": "nextjs-cache",
+      "description": "Investigate Next.js server rendering and cache invalidation behavior."
+    },
+    {
+      "name": "redis-cache",
+      "description": "Design Redis cache keys, expiration policies and invalidation."
+    },
+    {
+      "name": "mongodb-schema",
+      "description": "Design MongoDB collections, document relationships and aggregations."
+    },
+    {
+      "name": "graphql-schema",
+      "description": "Design GraphQL schemas, resolvers and query complexity limits."
+    },
+    {
+      "name": "websocket-reconnect",
+      "description": "Implement WebSocket reconnection and message ordering."
+    },
+    {
+      "name": "oauth-integration",
+      "description": "Implement OAuth authorization flows and refresh-token rotation."
+    },
+    {
+      "name": "jwt-review",
+      "description": "Review JWT signature verification, issuer checks and expiration handling."
+    },
+    {
+      "name": "stripe-checkout",
+      "description": "Integrate Stripe Checkout sessions, pricing and subscription upgrades."
+    },
+    {
+      "name": "email-delivery",
+      "description": "Configure transactional email, SPF, DKIM and bounce handling."
+    },
+    {
+      "name": "s3-lifecycle",
+      "description": "Configure object storage lifecycle policies, retention and replication."
+    },
+    {
+      "name": "pdf-create",
+      "description": "Generate PDF reports with page layout, typography and charts."
+    },
+    {
+      "name": "pdf-sign",
+      "description": "Apply digital signatures and verify certificate chains in PDF files."
+    },
+    {
+      "name": "ocr-images",
+      "description": "Recognize text from photos and screenshots with OCR."
+    },
+    {
+      "name": "image-resize",
+      "description": "Resize, crop and compress raster images for web delivery."
+    },
+    {
+      "name": "svg-icons",
+      "description": "Design SVG icons and optimize path geometry."
+    },
+    {
+      "name": "video-edit",
+      "description": "Trim video clips, add captions and export social media cuts."
+    },
+    {
+      "name": "audio-mix",
+      "description": "Mix speech and music, normalize loudness and remove audio noise."
+    },
+    {
+      "name": "translation",
+      "description": "Translate written content between languages while preserving tone."
+    },
+    {
+      "name": "copy-edit",
+      "description": "Edit prose for grammar, clarity and consistent editorial style."
+    },
+    {
+      "name": "seo-audit",
+      "description": "Audit page metadata, structured data and search indexing."
+    },
+    {
+      "name": "landing-copy",
+      "description": "Write landing-page headlines, benefits and calls to action."
+    },
+    {
+      "name": "customer-interview",
+      "description": "Plan customer research interviews and synthesize qualitative feedback."
+    },
+    {
+      "name": "survey-design",
+      "description": "Design unbiased questionnaires and sampling plans."
+    },
+    {
+      "name": "ab-test",
+      "description": "Plan randomized A/B experiments and evaluate conversion differences."
+    },
+    {
+      "name": "analytics-events",
+      "description": "Define product analytics event schemas and instrumentation."
+    },
+    {
+      "name": "python-packaging",
+      "description": "Publish Python packages with dependency metadata and build tooling."
+    },
+    {
+      "name": "rust-borrow",
+      "description": "Fix Rust borrow checker errors and ownership lifetimes."
+    },
+    {
+      "name": "go-concurrency",
+      "description": "Review Go goroutines, channels and cancellation."
+    },
+    {
+      "name": "java-gc",
+      "description": "Diagnose JVM garbage collection and tune heap allocation."
+    },
+    {
+      "name": "android-compose",
+      "description": "Build Android screens using Jetpack Compose."
+    },
+    {
+      "name": "ios-swiftui",
+      "description": "Build iOS views and state management using SwiftUI."
+    },
+    {
+      "name": "flutter-widgets",
+      "description": "Build Flutter widget layouts and navigation."
+    },
+    {
+      "name": "linux-permissions",
+      "description": "Diagnose Linux file ownership, modes and access control."
+    },
+    {
+      "name": "nginx-proxy",
+      "description": "Configure Nginx reverse proxies, upstreams and TLS termination."
+    },
+    {
+      "name": "dns-debug",
+      "description": "Investigate DNS resolution, record propagation and resolver errors."
+    },
+    {
+      "name": "tls-certificates",
+      "description": "Renew TLS certificates and diagnose HTTPS certificate failures."
+    },
+    {
+      "name": "load-testing",
+      "description": "Design HTTP load tests and interpret throughput and tail latency."
+    },
+    {
+      "name": "log-analysis",
+      "description": "Search application logs and correlate errors across services."
+    },
+    {
+      "name": "monitoring-alerts",
+      "description": "Define service metrics, dashboards and actionable alert rules."
+    },
+    {
+      "name": "database-migrations",
+      "description": "Plan safe database schema migrations and rollback procedures."
+    },
+    {
+      "name": "api-pagination",
+      "description": "Design cursor pagination and stable ordering for list endpoints."
+    },
+    {
+      "name": "security-headers",
+      "description": "Configure browser security headers and content security policy."
+    }
+  ],
+  "cases": [
+    {
+      "problem": "Extract the invoice line items from this scanned PDF into a table.",
+      "expected": "pdf-extract"
+    },
+    {
+      "problem": "This SQL join is slow; check its query plan and missing indexes.",
+      "expected": "sql-review"
+    },
+    {
+      "problem": "Turn these merged PRs into a changelog grouped by features and fixes.",
+      "expected": "release-notes"
+    },
+    {
+      "problem": "The React dialog cannot be used with Tab; audit focus and labels.",
+      "expected": "react-a11y"
+    },
+    {
+      "problem": "Normalize the date column and remove duplicate records in this CSV export.",
+      "expected": "csv-clean"
+    },
+    {
+      "problem": "Prepare a blameless outage write-up with a timeline and action items.",
+      "expected": "incident-postmortem"
+    },
+    {
+      "problem": "Our payment webhook is delivered twice; check Stripe signatures and idempotency.",
+      "expected": "stripe-webhooks"
+    },
+    {
+      "problem": "A Dockerfile layer crashes during image build; help diagnose it.",
+      "expected": "docker-debug"
+    },
+    {
+      "problem": "Book a table for two at a restaurant tonight.",
+      "expected": null
+    },
+    {
+      "problem": "Suggest a mountain hiking route for next weekend.",
+      "expected": null
+    },
+    {
+      "problem": "What is the capital of Portugal?",
+      "expected": null
+    },
+    {
+      "problem": "Solve this quadratic equation: x squared minus five x plus six equals zero.",
+      "expected": null
+    }
+  ]
+}

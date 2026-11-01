@@ -16,7 +16,7 @@ def test_mcp_authentication_tool_and_revocation(monkeypatch):
 
     async def match(problem, skills):
         assert problem == "design a page"
-        return skills[0]
+        return {**skills[0], "confidence": 0.9}
     monkeypatch.setattr(server, "select_skill", match)
 
     headers = {"x-snap-api-key": "snap_test", "accept": "application/json, text/event-stream"}
@@ -33,6 +33,7 @@ def test_mcp_authentication_tool_and_revocation(monkeypatch):
         payload = json.loads(result["content"][0]["text"])
         assert payload["url"].startswith("https://storage.example/alice/")
         assert "Use this skill." in payload["content"]
+        assert payload["confidence"] == 0.9
         allowed.clear()
         assert rpc(client, "tools/list", {}).status_code == 401
 
@@ -66,7 +67,8 @@ async def test_select_skill_uses_configured_provider(monkeypatch, provider):
 
     monkeypatch.setattr(server.httpx, "AsyncClient", Client)
     skill = {"id": "one", "name": "Design", "description": "Design help"}
-    assert await server.select_skill("design a page", [skill]) == skill
+    assert await server.select_skill("design a page", [skill]) == {**skill, "confidence": 0.9}
+    assert "confidence" not in skill
 
 
 def test_verify_key_uses_hash_and_consistent_read(monkeypatch):

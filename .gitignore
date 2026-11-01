@@ -12,6 +12,13 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+.coverage
+.coverage.*
+htmlcov/
+junit.xml
 
 # next.js
 /.next/
@@ -45,6 +52,9 @@ yarn-error.log*
 /mcp-service/benchmark-*.json
 /docs/context-benchmark.md
 
+# Local video production workspace; README delivery assets live in docs/media.
+/videos/
+
 # Local and duplicate source artwork
 /snap-logo.png
 /snap-logo.svg
@@ -54,6 +64,9 @@ yarn-error.log*
 .venv/
 __pycache__/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py[cod]
 
 # vercel
 .vercel

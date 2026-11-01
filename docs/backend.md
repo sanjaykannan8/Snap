@@ -27,7 +27,7 @@ The local DynamoDB single-table layout is intentionally small:
 
 Workers AI receives the task as `state` and each skill's name/description as a typed `choice` criterion. The Cloudflare token must have Workers AI inference permission and must never be exposed with a `NEXT_PUBLIC_` prefix.
 
-New skills are stored in MinIO. The MCP tool returns the skill content inline plus a five-minute presigned HTTP URL; that URL is not an MCP resource. A previously issued URL remains usable until it expires, even after its API key is revoked. Skills saved before object storage was introduced remain readable from DynamoDB and are returned directly. The larger-Clef fallback shown in the diagrams is not implemented yet. Remote clients need a deployed HTTPS MCP endpoint; downloading from the optional URL additionally needs an HTTPS-accessible object-storage endpoint. `127.0.0.1:9000` works only for clients on the same machine. Configure `S3_PUBLIC_ENDPOINT` to the externally reachable MinIO URL when testing remotely, and configure MinIO credentials consistently with the compose environment. Do not expose the default development credentials to the internet.
+New skills are stored in MinIO. See [skill content and signed downloads](network.md#skill-content-and-signed-downloads) for the response format, expiry, key revocation behavior and remote storage setup. The larger-Clef fallback shown in the diagrams is not implemented yet. Do not expose the default development credentials to the internet.
 
 For clients accepting JSON configuration, the connection looks like:
 
@@ -39,7 +39,7 @@ Run `uv run pytest` in `mcp-service` to test the MCP protocol and authentication
 
 ## Independent MCP deployment
 
-Run `uv run python server.py` from `mcp-service`; it listens on `127.0.0.1:3100` by default. `/health` is its process health endpoint. Set `MCP_PUBLIC_URL` on the web app to the public HTTPS MCP URL shown in the dashboard. Deploy `mcp-service/Dockerfile` independently and scale replicas behind an HTTPS load balancer. Every replica must use the same DynamoDB table, routing-provider settings, bucket and externally reachable `S3_PUBLIC_ENDPOINT`. Key revocations are checked against DynamoDB on each call. `MCP_ALLOWED_ORIGINS` is a comma-separated allowlist for browser clients that send an Origin header; non-browser MCP clients can omit Origin. Configure network access and secrets on each deployment. See the README for provider selection and network binding settings.
+Run `uv run python server.py` from `mcp-service`; it listens on `127.0.0.1:3100` by default. `/health` is its process health endpoint. Set `MCP_PUBLIC_URL` on the web app to the public HTTPS MCP URL shown in the dashboard. Deploy `mcp-service/Dockerfile` independently and scale replicas behind an HTTPS load balancer. Every replica must use the same DynamoDB table, routing-provider settings, bucket and externally reachable `S3_PUBLIC_ENDPOINT`. Key revocations are checked against DynamoDB on each call. `MCP_ALLOWED_ORIGINS` is a comma-separated allowlist for browser clients that send an Origin header; non-browser MCP clients can omit Origin. Configure network access and secrets on each deployment. See the [README](../README.md#configure-the-model) for provider selection and [network setup](network.md) for binding settings.
 
 ## Product diagrams
 
